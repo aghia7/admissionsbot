@@ -9,4 +9,6 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     List<Question> findByCategoryId(Long id);
     Question findByQuestionRus(String question);
+    Question findByQuestionKaz(String question);
+    Question findByQuestionEng(String question);
 }

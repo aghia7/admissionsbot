@@ -8,7 +8,9 @@ public interface QuestionService {
 
     Question getById(Long id);
 
-    Question getAnswerByQuestion(String question);
+    Question getAnswerByQuestionRus(String question);
+    Question getAnswerByQuestionKaz(String question);
+    Question getAnswerByQuestionEng(String question);
 
     List<Question> getByCategoryId(Long id);
 

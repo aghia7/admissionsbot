@@ -49,17 +49,20 @@ public class QuestionRestController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        Question question = this.questionService.getAnswerByQuestion(questionAsked);
-
-        if (question == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
         try {
             lang = lang.toUpperCase(); //KAZ RUS ENG
             lang = lang.replaceAll("\\s", "");
+            Question question;
+            if (lang.equals("KAZ")) {
+                question = this.questionService.getAnswerByQuestionKaz(questionAsked);
+            } else if (lang.equals("RUS")) {
+                question = this.questionService.getAnswerByQuestionRus(questionAsked);
+            } else {
+                question = this.questionService.getAnswerByQuestionEng(questionAsked);
+            }
             return new ResponseEntity<>(new QuestionDTO(question, Language.valueOf(lang)), HttpStatus.OK);
         } catch (Exception e) {
+            Question question = this.questionService.getAnswerByQuestionRus(questionAsked);
             return new ResponseEntity<>(new QuestionDTO(question, Language.RUS), HttpStatus.OK);
         }
     }

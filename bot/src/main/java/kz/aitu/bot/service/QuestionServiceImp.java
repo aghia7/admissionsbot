@@ -22,8 +22,18 @@ public class QuestionServiceImp implements QuestionService {
     }
 
     @Override
-    public Question getAnswerByQuestion(String question) {
+    public Question getAnswerByQuestionRus(String question) {
         return questionRepository.findByQuestionRus(question);
+    }
+
+    @Override
+    public Question getAnswerByQuestionKaz(String question) {
+        return questionRepository.findByQuestionKaz(question);
+    }
+
+    @Override
+    public Question getAnswerByQuestionEng(String question) {
+        return questionRepository.findByQuestionEng(question);
     }
 
     @Override
