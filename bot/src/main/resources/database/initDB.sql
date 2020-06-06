@@ -12,7 +12,7 @@ create table if not exists faq
     answer_kaz       varchar   not null,
     answer_eng       varchar   not null,
     question_counter bigint,
-    category_id      bigint    not null
+    category_question_id      bigint    not null
 );
 
 create table if not exists categories

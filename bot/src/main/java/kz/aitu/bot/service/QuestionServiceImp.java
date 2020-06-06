@@ -18,16 +18,33 @@ public class QuestionServiceImp implements QuestionService {
 
     @Override
     public Question getById(Long id) {
-        return questionRepository.getOne(id);
+        return questionRepository.findById(id).orElse(null);
     }
 
     @Override
     public List<Question> getByCategoryId(Long id) {
-        return null;
+        return questionRepository.findByCategoryId(id);
     }
 
     @Override
     public List<Question> findAll() {
         return questionRepository.findAll();
     }
+
+//      @Override
+//    public void addQuestion(Question question) {
+//
+//        questionRepository.save(question);
+//    }
+
+//    @Override
+//    public void editQuestion(Question question) {
+//        questionRepository.save(question);
+//    }
+//
+//    @Override
+//    public void deleteQuestion(Long id) {
+//        questionRepository.deleteById(id);
+//    }
+
 }

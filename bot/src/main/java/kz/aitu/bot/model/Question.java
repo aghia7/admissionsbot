@@ -34,8 +34,8 @@ public class Question {
     @Column(name = "question_counter")
     private int question_counter;
 
-    @Column(name = "category_id")
-    private long category_id;
+    @Column(name = "category_question_id")
+    private long categoryId;
 
 
 }

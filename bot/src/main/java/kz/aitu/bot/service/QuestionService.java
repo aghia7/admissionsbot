@@ -11,4 +11,12 @@ public interface QuestionService {
     List<Question> getByCategoryId(Long id);
 
     List<Question> findAll();
+
+//    void  addQuestion(Question question);
+//
+//    void editQuestion(Question question);
+//
+//    void deleteQuestion(Long id);
+
+
 }
