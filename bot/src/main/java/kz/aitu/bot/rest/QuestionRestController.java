@@ -7,10 +7,7 @@ import kz.aitu.bot.service.QuestionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +29,27 @@ public class QuestionRestController {
         }
 
         Question question = this.questionService.getById(questionId);
+
+        if (question == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            lang = lang.toUpperCase(); //KAZ RUS ENG
+            lang = lang.replaceAll("\\s", "");
+            return new ResponseEntity<>(new QuestionDTO(question, Language.valueOf(lang)), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new QuestionDTO(question, Language.RUS), HttpStatus.OK);
+        }
+    }
+
+    @RequestMapping(value = "/lang/{lang}/question", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<QuestionDTO> getAnswerByQuestionLang(@PathVariable("lang") String lang, @RequestParam("question") String questionAsked) {
+        if (questionAsked == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Question question = this.questionService.getAnswerByQuestion(questionAsked);
 
         if (question == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

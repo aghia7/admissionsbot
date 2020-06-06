@@ -8,9 +8,12 @@ public interface QuestionService {
 
     Question getById(Long id);
 
+    Question getAnswerByQuestion(String question);
+
     List<Question> getByCategoryId(Long id);
 
     List<Question> findAll();
+
 
 //    void  addQuestion(Question question);
 //

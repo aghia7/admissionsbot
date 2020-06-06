@@ -22,6 +22,11 @@ public class QuestionServiceImp implements QuestionService {
     }
 
     @Override
+    public Question getAnswerByQuestion(String question) {
+        return questionRepository.findByQuestionRus(question);
+    }
+
+    @Override
     public List<Question> getByCategoryId(Long id) {
         return questionRepository.findByCategoryId(id);
     }

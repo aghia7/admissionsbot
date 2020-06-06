@@ -14,14 +14,17 @@ public class QuestionDTO {
     public QuestionDTO(Question question, Language lang) {
         this.setId(question.getId());
         if (lang == Language.KAZ) {
-            this.setQuestion(question.getQuestion_kaz());
-            this.setAnswer(question.getAnswer_kaz());
+            this.setQuestion(question.getQuestionKaz());
+            this.setAnswer(question.getAnswerKaz());
+            this.setCategoryId(question.getCategoryId());
         } else if (lang == Language.ENG) {
-            this.setQuestion(question.getQuestion_eng());
-            this.setAnswer(question.getAnswer_eng());
+            this.setQuestion(question.getQuestionEng());
+            this.setAnswer(question.getAnswerEng());
+            this.setCategoryId(question.getCategoryId());
         } else {
-            this.setQuestion(question.getQuestion_rus());
-            this.setAnswer(question.getAnswer_rus());
+            this.setQuestion(question.getQuestionRus());
+            this.setAnswer(question.getAnswerRus());
+            this.setCategoryId(question.getCategoryId());
         }
     }
 
