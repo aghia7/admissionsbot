@@ -1,5 +1,6 @@
-package kz.aitu.bot.service;
+package kz.aitu.bot.service.interfaces;
 
+import kz.aitu.bot.dtos.QuestionInsertUpdateDTO;
 import kz.aitu.bot.model.Question;
 
 import java.util.List;
@@ -15,6 +16,18 @@ public interface QuestionService {
     List<Question> getByCategoryId(Long id);
 
     List<Question> findAll();
+
+    List<Question> getByCategoryNameKaz(String catname);
+
+    List<Question> getByCategoryNameRus(String catname);
+
+    List<Question> getByCategoryNameEng(String catname);
+
+    void addQuestion(QuestionInsertUpdateDTO questionInsertDTO);
+
+    void removeQuestionById(Long parentId);
+
+    void updateQuestion(QuestionInsertUpdateDTO questionUpdateDTO) throws Exception;
 
 
 //    void  addQuestion(Question question);

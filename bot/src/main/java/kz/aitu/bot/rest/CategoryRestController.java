@@ -1,16 +1,17 @@
 package kz.aitu.bot.rest;
 
 import kz.aitu.bot.dtos.CategoryDTO;
+import kz.aitu.bot.dtos.CategoryInsertUpdateDTO;
 import kz.aitu.bot.model.Category;
 import kz.aitu.bot.model.Language;
-import kz.aitu.bot.service.CategoryService;
+import kz.aitu.bot.service.interfaces.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +20,8 @@ import java.util.List;
 @RequestMapping("api/v1/categories")
 public class CategoryRestController {
 
-    private final CategoryService categoryService;
-
-    public CategoryRestController(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
+    @Autowired
+    private CategoryService categoryService;
 
 
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -39,7 +37,7 @@ public class CategoryRestController {
     }
 
     @RequestMapping(value = "{lang}/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<CategoryDTO>> getCategoryByParentIdLang(@PathVariable("lang")String lang,@PathVariable("id")Long parentId) {
+    public ResponseEntity<List<CategoryDTO>> getCategoryByParentIdLang(@PathVariable("lang")String lang, @PathVariable("id")Long parentId) {
         if(parentId == null)
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 
@@ -50,15 +48,52 @@ public class CategoryRestController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         try {
-            lang = lang.toUpperCase();
+            lang = lang.toLowerCase();
             lang = lang.replaceAll("\\s", "");
             for (Category category : categories) {
-                categoryDTOS.add(new CategoryDTO(category, Language.valueOf(lang)));
+                categoryDTOS.add(new CategoryDTO(category, Language.convert(lang)));
             }
 
             return new ResponseEntity<>(categoryDTOS, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(categoryDTOS, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @RequestMapping(value = "{lang}/cat", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<CategoryDTO>> getCategoriesByParentCategoryNameRusLang(@PathVariable("lang")String lang, @RequestParam("category")String categoryName) {
+        lang = lang.toLowerCase();
+        lang = lang.replaceAll("\\s", "");
+
+        return getCategoryByName(categoryName, Language.convert(lang));
+    }
+
+
+    private ResponseEntity<List<CategoryDTO>> getCategoryByName(String categoryName, Language lang) {
+        if(categoryName.isEmpty())
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
+        List<Category> categories;
+
+        switch (lang) {
+            case KAZ -> categories = categoryService.getCategoryByNameKaz(categoryName);
+            case ENG -> categories = categoryService.getCategoryByNameEng(categoryName);
+            default -> categories = categoryService.getCategoryByNameRus(categoryName);
+        }
+
+        List<CategoryDTO> categoryDTOS = new ArrayList<>();
+
+        if(categories.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
+        try {
+            for (Category category : categories) {
+                categoryDTOS.add(new CategoryDTO(category, lang));
+            }
+
+            return new ResponseEntity<>(categoryDTOS, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -72,4 +107,45 @@ public class CategoryRestController {
 
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
+
+    @RequestMapping(value = "admin/add", method = RequestMethod.POST)
+    public ResponseEntity<?> createCategory(@RequestBody CategoryInsertUpdateDTO categoryInsertDTO) {
+        try {
+            categoryService.addCategory(categoryInsertDTO);
+        } catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Parent category does not exist");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
+
+        return ResponseEntity.ok().body("A new category was created successfully!");
+    }
+
+    @RequestMapping(value = "admin/update", method = RequestMethod.POST)
+    public ResponseEntity<?> updateCategory(@RequestBody CategoryInsertUpdateDTO categoryUpdateDTO) {
+        try {
+            categoryService.updateCategory(categoryUpdateDTO);
+        } catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Parent category does not exist");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
+
+        return ResponseEntity.ok().body("Selected category was updated successfully!");
+    }
+
+    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.GET)
+    public ResponseEntity<?> deleteCategory(@PathVariable("id")Long parentId) {
+        try {
+            categoryService.removeCategoryById(parentId);
+        } catch (EmptyResultDataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category does not exist!");
+        } catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category has its sub-categories");
+        }
+
+        return ResponseEntity.ok().body("Selected category was removed successfully!");
+    }
+
+
 }

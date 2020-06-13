@@ -1,9 +1,13 @@
 package kz.aitu.bot.rest;
 
 import kz.aitu.bot.dtos.QuestionDTO;
+import kz.aitu.bot.dtos.QuestionInsertUpdateDTO;
 import kz.aitu.bot.model.Language;
 import kz.aitu.bot.model.Question;
-import kz.aitu.bot.service.QuestionService;
+import kz.aitu.bot.service.interfaces.QuestionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +20,8 @@ import java.util.List;
 @RequestMapping("/api/v1/questions/")
 public class QuestionRestController {
 
-    private final QuestionService questionService;
-
-    public QuestionRestController(QuestionService questionService) {
-        this.questionService = questionService;
-    }
+    @Autowired
+    private QuestionService questionService;
 
     @RequestMapping(value = "{lang}/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<QuestionDTO> getQuestionLang(@PathVariable("lang") String lang, @PathVariable("id") Long questionId) {
@@ -35,35 +36,40 @@ public class QuestionRestController {
         }
 
         try {
-            lang = lang.toUpperCase(); //KAZ RUS ENG
+            lang = lang.toLowerCase();
             lang = lang.replaceAll("\\s", "");
-            return new ResponseEntity<>(new QuestionDTO(question, Language.valueOf(lang)), HttpStatus.OK);
+            return new ResponseEntity<>(new QuestionDTO(question, Language.convert(lang)), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new QuestionDTO(question, Language.RUS), HttpStatus.OK);
         }
     }
 
-    @RequestMapping(value = "/lang/{lang}/question", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "lang/{lang}/question", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<QuestionDTO> getAnswerByQuestionLang(@PathVariable("lang") String lang, @RequestParam("question") String questionAsked) {
         if (questionAsked == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         try {
-            lang = lang.toUpperCase(); //KAZ RUS ENG
+            lang = lang.toLowerCase(); //KAZ RUS ENG
             lang = lang.replaceAll("\\s", "");
+            Language language = Language.convert(lang);
             Question question;
-            if (lang.equals("KAZ")) {
+            if (language == Language.KAZ) {
                 question = this.questionService.getAnswerByQuestionKaz(questionAsked);
-            } else if (lang.equals("RUS")) {
+            } else if (language == Language.RUS) {
                 question = this.questionService.getAnswerByQuestionRus(questionAsked);
             } else {
                 question = this.questionService.getAnswerByQuestionEng(questionAsked);
             }
-            return new ResponseEntity<>(new QuestionDTO(question, Language.valueOf(lang)), HttpStatus.OK);
+            if (question == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            } else {
+                return new ResponseEntity<>(new QuestionDTO(question, language), HttpStatus.OK);
+            }
+
         } catch (Exception e) {
-            Question question = this.questionService.getAnswerByQuestionRus(questionAsked);
-            return new ResponseEntity<>(new QuestionDTO(question, Language.RUS), HttpStatus.OK);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -92,7 +98,7 @@ public class QuestionRestController {
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/lang/{lang}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "lang/{lang}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<QuestionDTO>> getAllQuestionsLang(@PathVariable("lang") String lang) {
         List<Question> questions = this.questionService.findAll();
         List<QuestionDTO> questionDTOS = new ArrayList<>();
@@ -101,10 +107,10 @@ public class QuestionRestController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         try {
-            lang = lang.toUpperCase();
+            lang = lang.toLowerCase();
             lang = lang.replaceAll("\\s", "");
             for (Question question : questions) {
-                questionDTOS.add(new QuestionDTO(question, Language.valueOf(lang)));
+                questionDTOS.add(new QuestionDTO(question, Language.convert(lang)));
             }
 
             return new ResponseEntity<>(questionDTOS, HttpStatus.OK);
@@ -114,7 +120,7 @@ public class QuestionRestController {
         }
     }
 
-    @RequestMapping(value = "/lang/{lang}/cat/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "lang/{lang}/cat/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<QuestionDTO>> getQuestionsByCategoryIdAndLang(@PathVariable("lang") String lang, @PathVariable("id") Long id) {
         if (id == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -128,10 +134,10 @@ public class QuestionRestController {
         }
 
         try {
-            lang = lang.toUpperCase();
+            lang = lang.toLowerCase();
             lang = lang.replaceAll("\\s", "");
             for (Question question : questions) {
-                questionDTOS.add(new QuestionDTO(question, Language.valueOf(lang)));
+                questionDTOS.add(new QuestionDTO(question, Language.convert(lang)));
             }
 
             return new ResponseEntity<>(questionDTOS, HttpStatus.OK);
@@ -141,13 +147,77 @@ public class QuestionRestController {
         }
     }
 
-    //    @RequestMapping(path = "add", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity addQuestion(Question question) {
-//        if(question == null) {
-//            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-//        }
-//        questionService.addQuestion(question);
-//        return new ResponseEntity(question, HttpStatus.OK);
-//    }
+    @RequestMapping(value = "/lang/{lang}/catname", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<QuestionDTO>> getQuestionsByCategoryNameAndLang(@PathVariable("lang") String lang, @RequestParam("category") String catname) {
+        if (catname == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<QuestionDTO> questionDTOS = new ArrayList<>();
+        try {
+            lang = lang.toUpperCase();
+            lang = lang.replaceAll("\\s", "");
+            Language language = Language.convert(lang);
+            List<Question> questions;
+            switch (language) {
+                case KAZ -> questions = questionService.getByCategoryNameKaz(catname);
+//                case ENG -> questions = questionService.getByCategoryNameEng(catname);
+                default -> questions = questionService.getByCategoryNameRus(catname);
+            }
+
+
+            if (questions.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            for (Question question : questions) {
+                questionDTOS.add(new QuestionDTO(question, language));
+            }
+
+            return new ResponseEntity<>(questionDTOS, HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(questionDTOS, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @RequestMapping(value = "admin/add", method = RequestMethod.POST)
+    public ResponseEntity<?> createQuestion(@RequestBody QuestionInsertUpdateDTO questionInsertDTO) {
+        try {
+            questionService.addQuestion(questionInsertDTO);
+        } catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Parent category does not exist");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
+
+        return ResponseEntity.ok().body("A new category was created successfully!");
+    }
+
+    @RequestMapping(value = "admin/update", method = RequestMethod.POST)
+    public ResponseEntity<?> updateCategory(@RequestBody QuestionInsertUpdateDTO questionUpdateDTO) {
+        try {
+            questionService.updateQuestion(questionUpdateDTO);
+        } catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Parent category does not exist");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
+
+        return ResponseEntity.ok().body("Selected category was updated successfully!");
+    }
+
+    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.GET)
+    public ResponseEntity<?> deleteCategory(@PathVariable("id") Long parentId) {
+        try {
+            questionService.removeQuestionById(parentId);
+        } catch (EmptyResultDataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category does not exist!");
+        } catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category has its sub-categories");
+        }
+
+        return ResponseEntity.ok().body("Selected category was removed successfully!");
+    }
 
 }

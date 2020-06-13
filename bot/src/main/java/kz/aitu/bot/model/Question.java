@@ -1,12 +1,18 @@
 package kz.aitu.bot.model;
 
+import kz.aitu.bot.dtos.QuestionInsertUpdateDTO;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 
 @Data
 @Entity
 @Table(name = "faq")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Question {
 
     @Id
@@ -31,11 +37,29 @@ public class Question {
     @Column(name = "answer_eng")
     private String answerEng;
 
-    @Column(name = "question_counter")
-    private int questionCounter;
+//    @Column(name = "question_counter")
+//    private int questionCounter;
 
-    @Column(name = "category_question_id")
+    @Column(name = "category_id")
     private long categoryId;
 
+    @Formula("(select cc.category_name_rus from categories cc where cc.id = category_id)")
+    public String categoryNameRus;
 
+    @Formula("(select cc.category_name_kaz from categories cc where cc.id = category_id)")
+    public String categoryNameKaz;
+
+    @Formula("(select cc.category_name_eng from categories cc where cc.id = category_id)")
+    public String categoryNameEng;
+
+    public Question(QuestionInsertUpdateDTO dto) {
+        setId(dto.getId());
+        setQuestionEng(dto.getQuestionEng());
+        setQuestionKaz(dto.getQuestionKaz());
+        setQuestionRus(dto.getQuestionRus());
+        setAnswerEng(dto.getAnswerEng());
+        setAnswerKaz(dto.getAnswerKaz());
+        setAnswerRus(dto.getAnswerRus());
+        setCategoryId(dto.getCategoryId());
+    }
 }

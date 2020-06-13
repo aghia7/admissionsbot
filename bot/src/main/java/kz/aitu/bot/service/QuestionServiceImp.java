@@ -1,7 +1,9 @@
 package kz.aitu.bot.service;
 
+import kz.aitu.bot.dtos.QuestionInsertUpdateDTO;
 import kz.aitu.bot.model.Question;
 import kz.aitu.bot.repository.QuestionRepository;
+import kz.aitu.bot.service.interfaces.QuestionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,17 +25,17 @@ public class QuestionServiceImp implements QuestionService {
 
     @Override
     public Question getAnswerByQuestionRus(String question) {
-        return questionRepository.findByQuestionRus(question);
+        return questionRepository.findByQuestionRusContaining(question);
     }
 
     @Override
     public Question getAnswerByQuestionKaz(String question) {
-        return questionRepository.findByQuestionKaz(question);
+        return questionRepository.findByQuestionKazContaining(question);
     }
 
     @Override
     public Question getAnswerByQuestionEng(String question) {
-        return questionRepository.findByQuestionEng(question);
+        return questionRepository.findByQuestionEngContaining(question);
     }
 
     @Override
@@ -46,20 +48,38 @@ public class QuestionServiceImp implements QuestionService {
         return questionRepository.findAll();
     }
 
-//      @Override
-//    public void addQuestion(Question question) {
-//
-//        questionRepository.save(question);
-//    }
+    @Override
+    public List<Question> getByCategoryNameKaz(String catname) {
+        return questionRepository.findByCategoryNameKazContaining(catname);
+    }
 
-//    @Override
-//    public void editQuestion(Question question) {
-//        questionRepository.save(question);
-//    }
-//
-//    @Override
-//    public void deleteQuestion(Long id) {
-//        questionRepository.deleteById(id);
-//    }
+    @Override
+    public List<Question> getByCategoryNameRus(String catname) {
+        return questionRepository.findByCategoryNameRusContaining(catname);
+    }
+
+    @Override
+    public List<Question> getByCategoryNameEng(String catname) {
+        return questionRepository.findByCategoryNameEngContaining(catname);
+    }
+
+    @Override
+    public void addQuestion(QuestionInsertUpdateDTO questionInsertDTO) {
+        Question category = new Question(questionInsertDTO);
+        questionRepository.save(category);
+    }
+
+    @Override
+    public void removeQuestionById(Long parentId) {
+        questionRepository.deleteById(parentId);
+    }
+
+    @Override
+    public void updateQuestion(QuestionInsertUpdateDTO questionUpdateDTO) throws Exception {
+        if (!questionRepository.existsById(questionUpdateDTO.getId()))
+            throw new Exception("Category does not exist!");
+        Question category = new Question(questionUpdateDTO);
+        questionRepository.save(category);
+    }
 
 }

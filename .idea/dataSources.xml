@@ -7,5 +7,13 @@
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5432/webapp</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="bot/Hibernate" uuid="2ff77cd8-0cc2-4287-9014-8ed053bf043d">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <imported>true</imported>
+      <remarks>Hibernate</remarks>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5432/webapp</jdbc-url>
+    </data-source>
   </component>
 </project>
