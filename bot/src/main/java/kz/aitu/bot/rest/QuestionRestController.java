@@ -155,7 +155,7 @@ public class QuestionRestController {
 
         List<QuestionDTO> questionDTOS = new ArrayList<>();
         try {
-            lang = lang.toUpperCase();
+            lang = lang.toLowerCase();
             lang = lang.replaceAll("\\s", "");
             Language language = Language.convert(lang);
             List<Question> questions;
