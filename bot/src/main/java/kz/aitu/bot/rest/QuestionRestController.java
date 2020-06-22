@@ -194,7 +194,7 @@ public class QuestionRestController {
         return ResponseEntity.ok().body("A new category was created successfully!");
     }
 
-    @RequestMapping(value = "admin/update", method = RequestMethod.POST)
+    @RequestMapping(value = "admin/update", method = RequestMethod.PUT)
     public ResponseEntity<?> updateCategory(@RequestBody QuestionInsertUpdateDTO questionUpdateDTO) {
         try {
             questionService.updateQuestion(questionUpdateDTO);
@@ -207,7 +207,7 @@ public class QuestionRestController {
         return ResponseEntity.ok().body("Selected category was updated successfully!");
     }
 
-    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteCategory(@PathVariable("id") Long parentId) {
         try {
             questionService.removeQuestionById(parentId);

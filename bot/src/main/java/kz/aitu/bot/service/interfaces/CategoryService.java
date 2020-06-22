@@ -22,4 +22,6 @@ public interface CategoryService {
     void removeCategoryById(Long parentId);
 
     void updateCategory(CategoryInsertUpdateDTO categoryUpdateDTO) throws Exception;
+
+    Category getCategoryById(Long id);
 }

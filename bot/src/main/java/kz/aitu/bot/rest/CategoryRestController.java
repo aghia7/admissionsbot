@@ -25,6 +25,18 @@ public class CategoryRestController {
 
 
     @RequestMapping(value = "{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getCategoryById(@PathVariable("id")Long id) {
+        Category category = categoryService.getCategoryById(id);
+
+        if(category == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(category, HttpStatus.OK);
+
+    }
+
+    @RequestMapping(value = "parent/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Category>> getCategoryByParentId(@PathVariable("id")Long parentId) {
         List<Category> categories = categoryService.getCategoryByParentId(parentId);
 
@@ -121,7 +133,7 @@ public class CategoryRestController {
         return ResponseEntity.ok().body("A new category was created successfully!");
     }
 
-    @RequestMapping(value = "admin/update", method = RequestMethod.POST)
+    @RequestMapping(value = "admin/update", method = RequestMethod.PUT)
     public ResponseEntity<?> updateCategory(@RequestBody CategoryInsertUpdateDTO categoryUpdateDTO) {
         try {
             categoryService.updateCategory(categoryUpdateDTO);
@@ -134,7 +146,7 @@ public class CategoryRestController {
         return ResponseEntity.ok().body("Selected category was updated successfully!");
     }
 
-    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteCategory(@PathVariable("id")Long parentId) {
         try {
             categoryService.removeCategoryById(parentId);

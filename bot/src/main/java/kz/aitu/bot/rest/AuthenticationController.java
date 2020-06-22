@@ -2,6 +2,7 @@ package kz.aitu.bot.rest;
 
 import kz.aitu.bot.dtos.AuthenticationRequest;
 import kz.aitu.bot.dtos.AuthenticationResponse;
+import kz.aitu.bot.dtos.LogDTO;
 import kz.aitu.bot.service.CustomUserDetailsService;
 import kz.aitu.bot.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("api/v1/auth")
 public class AuthenticationController {
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -28,7 +30,7 @@ public class AuthenticationController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @RequestMapping(value = "/auth", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) {
         try {
             authenticationManager.authenticate(
@@ -38,7 +40,7 @@ public class AuthenticationController {
                     )
             );
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect username or password!");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LogDTO("Incorrect username or password!"));
         }
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUsername());

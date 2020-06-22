@@ -58,4 +58,9 @@ public class CategoryServiceImp implements CategoryService {
         Category category = new Category(categoryUpdateDTO);
         categoryRepository.save(category);
     }
+
+    @Override
+    public Category getCategoryById(Long id) {
+        return categoryRepository.findById(id).orElse(null);
+    }
 }
