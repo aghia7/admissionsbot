@@ -2,6 +2,7 @@ package kz.aitu.bot.rest;
 
 import kz.aitu.bot.dtos.CategoryDTO;
 import kz.aitu.bot.dtos.CategoryInsertUpdateDTO;
+import kz.aitu.bot.dtos.LogDTO;
 import kz.aitu.bot.model.Category;
 import kz.aitu.bot.model.Language;
 import kz.aitu.bot.service.interfaces.CategoryService;
@@ -120,7 +121,7 @@ public class CategoryRestController {
         return new ResponseEntity<>(categories, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "admin/add", method = RequestMethod.POST)
+    @RequestMapping(value = "admin/add", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createCategory(@RequestBody CategoryInsertUpdateDTO categoryInsertDTO) {
         try {
             categoryService.addCategory(categoryInsertDTO);
@@ -130,10 +131,10 @@ public class CategoryRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
 
-        return ResponseEntity.ok().body("A new category was created successfully!");
+        return ResponseEntity.ok(new LogDTO("A new category was created successfully!"));
     }
 
-    @RequestMapping(value = "admin/update", method = RequestMethod.PUT)
+    @RequestMapping(value = "admin/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateCategory(@RequestBody CategoryInsertUpdateDTO categoryUpdateDTO) {
         try {
             categoryService.updateCategory(categoryUpdateDTO);
@@ -143,10 +144,10 @@ public class CategoryRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
 
-        return ResponseEntity.ok().body("Selected category was updated successfully!");
+        return ResponseEntity.ok(new LogDTO("Selected category was updated successfully!"));
     }
 
-    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteCategory(@PathVariable("id")Long parentId) {
         try {
             categoryService.removeCategoryById(parentId);
@@ -156,7 +157,7 @@ public class CategoryRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category has its sub-categories");
         }
 
-        return ResponseEntity.ok().body("Selected category was removed successfully!");
+        return ResponseEntity.ok(new LogDTO("Selected category was removed successfully!"));
     }
 
 

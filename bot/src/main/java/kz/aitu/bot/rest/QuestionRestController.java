@@ -1,5 +1,6 @@
 package kz.aitu.bot.rest;
 
+import kz.aitu.bot.dtos.LogDTO;
 import kz.aitu.bot.dtos.QuestionDTO;
 import kz.aitu.bot.dtos.QuestionInsertUpdateDTO;
 import kz.aitu.bot.model.Language;
@@ -85,6 +86,20 @@ public class QuestionRestController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(new QuestionDTO(question, Language.RUS), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "full/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Question> getFullQuestion(@PathVariable("id") Long questionId) {
+        if (questionId == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        Question question = this.questionService.getById(questionId);
+
+        if (question == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(question, HttpStatus.OK);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -181,7 +196,7 @@ public class QuestionRestController {
         }
     }
 
-    @RequestMapping(value = "admin/add", method = RequestMethod.POST)
+    @RequestMapping(value = "admin/add", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createQuestion(@RequestBody QuestionInsertUpdateDTO questionInsertDTO) {
         try {
             questionService.addQuestion(questionInsertDTO);
@@ -191,10 +206,10 @@ public class QuestionRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
 
-        return ResponseEntity.ok().body("A new category was created successfully!");
+        return ResponseEntity.ok(new LogDTO("A new question was created successfully!"));
     }
 
-    @RequestMapping(value = "admin/update", method = RequestMethod.PUT)
+    @RequestMapping(value = "admin/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateCategory(@RequestBody QuestionInsertUpdateDTO questionUpdateDTO) {
         try {
             questionService.updateQuestion(questionUpdateDTO);
@@ -204,10 +219,10 @@ public class QuestionRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
 
-        return ResponseEntity.ok().body("Selected category was updated successfully!");
+        return ResponseEntity.ok(new LogDTO("Selected question was updated successfully!"));
     }
 
-    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "admin/delete/{id}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteCategory(@PathVariable("id") Long parentId) {
         try {
             questionService.removeQuestionById(parentId);
@@ -217,7 +232,7 @@ public class QuestionRestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category has its sub-categories");
         }
 
-        return ResponseEntity.ok().body("Selected category was removed successfully!");
+        return ResponseEntity.ok(new LogDTO("Selected question was removed successfully!"));
     }
 
 }

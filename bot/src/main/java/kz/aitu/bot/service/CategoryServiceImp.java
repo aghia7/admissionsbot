@@ -5,6 +5,7 @@ import kz.aitu.bot.model.Category;
 import kz.aitu.bot.repository.CategoryRepository;
 import kz.aitu.bot.service.interfaces.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class CategoryServiceImp implements CategoryService {
 
     @Override
     public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+        return categoryRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     @Override
