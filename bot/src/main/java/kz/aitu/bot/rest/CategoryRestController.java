@@ -89,9 +89,9 @@ public class CategoryRestController {
         List<Category> categories;
 
         switch (lang) {
-            case KAZ -> categories = categoryService.getCategoryByNameKaz(categoryName);
-            case ENG -> categories = categoryService.getCategoryByNameEng(categoryName);
-            default -> categories = categoryService.getCategoryByNameRus(categoryName);
+            case KAZ: categories = categoryService.getCategoryByNameKaz(categoryName); break;
+            case ENG: categories = categoryService.getCategoryByNameEng(categoryName); break;
+            default: categories = categoryService.getCategoryByNameRus(categoryName);
         }
 
         List<CategoryDTO> categoryDTOS = new ArrayList<>();

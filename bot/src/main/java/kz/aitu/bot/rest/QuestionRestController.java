@@ -175,9 +175,9 @@ public class QuestionRestController {
             Language language = Language.convert(lang);
             List<Question> questions;
             switch (language) {
-                case KAZ -> questions = questionService.getByCategoryNameKaz(catname);
+                case KAZ: questions = questionService.getByCategoryNameKaz(catname); break;
 //                case ENG -> questions = questionService.getByCategoryNameEng(catname);
-                default -> questions = questionService.getByCategoryNameRus(catname);
+                default: questions = questionService.getByCategoryNameRus(catname); break;
             }
 
 
